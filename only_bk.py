@@ -1,3 +1,9 @@
+## Title     : The way for extract integration
+## Objective : Result of Human-chr Human-site Virus-type Virus-breakpoint
+## Created by: fpeng
+## Created on: 2024/01/12
+
+
 import sys
 
 def only_bk(path):
