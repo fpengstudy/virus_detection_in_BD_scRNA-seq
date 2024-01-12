@@ -1,9 +1,16 @@
+## Title     : More detailed integration of information 
+## Objective : Result of more detailed integration of information
+## Created by: fpeng
+## Created on: 2024/01/12
+
+
 import sys
 import pandas as pd
 import re
 import numpy as np
 
-##从原始sort文件中提取所需数据并按照固定格式输出blast_sortpy_result文件##
+
+## Extract the required data from the original sort file and output the "blast_sortpy_result" file in a fixed format ##
 def sites_info(name):
     site_results = ""
     with open(name,"r") as result:
@@ -16,26 +23,30 @@ def sites_info(name):
         genome2_site = blast_all[i+1].split("\t")[8]
         gap = abs(int(blast_all[i].split("\t")[7])-int(blast_all[i+1].split("\t")[6]))
         reads_name = blast_all[i].split("\t")[0]
-      	##将HPV和human进行排序，使human在第一列
+        
+      	
+        ## sort HPV and human so that human is in the first column ##
         if "HPV" in genome2_name:
             site_results += genome1_name +"\t" + genome1_site + "\t"  + genome2_name +"\t" + genome2_site + "\t" + str(gap) + "\t" + reads_name + "\n"
         else:
             site_results += genome2_name + "\t" + genome2_site + "\t" + genome1_name + "\t" + genome1_site + "\t" + str(
                 gap) + "\t" + reads_name + "\n"
         #print(blast_all[i],end="")
-  	##写入文件
+  	
+    ## write to the file ##
     with open("blast_sortpy_result","w") as f2:
         print(site_results,file=f2)
         f2.close()
     return site_results
 
 
-##将每个细胞的barcode提出##
+## Barcode will be presented for each cell ##
 def sites_cluster(info):
     cluster_pre = pd.read_csv(info,sep='\t')
     #print(info.split("\n")[1].split("\t")[0])
     #print(cluster_pre)
-  	##dataframe排序根据基因组名字和位点
+    
+  	## Dataframe is sorted by genome name and locus ##
     cluster_sort = cluster_pre.sort_values(by=["genome1_name","genome1_site"],ascending=(True,True))
     cluster_sort = cluster_sort.reset_index(drop=True)
     #print(cluster_sort)
@@ -51,17 +62,18 @@ def sites_cluster(info):
     col = cluster_sort_bycell.pop('cell')
     cluster_sort_bycell.insert(loc=0,column='cell',value=col)
     #print(cluster_sort_bycell)
-    ## 查看所有元素，展示所有的dataframe
+    
+    ## View all the elements and display all the dataframe ##
     pd.set_option('display.max_columns', None)
     pd.set_option('display.max_rows', None)
     cluster_sort_bycell_setindex = cluster_sort_bycell.sort_values(by=["cell","genome1_name","genome1_site",genome2_name","genome2_site"], ascending=(True,True,True,True,True))
     cluster_sort_bycell_setindex = cluster_sort_bycell_setindex.reset_index(drop=True)
-  	##去掉不需要的gap
+  	##Get Rid of the gap no need #
     cluster_sort_bycell_setindex = cluster_sort_bycell_setindex.drop(['gap or overlap'],axis=1)
     cluster_sort_bycell_setindex.to_csv('cluster_sort_bycell_setindex',sep='\t',index=False,header=True,escapechar=' ')
 
 
-##对相同barcode的进行统计sites_cluster_reslut##
+## Statistical“sites_cluster_reslut” for the same barcode ##
 def total_sum(sort_after):
     # siteswith open("sites_cluster_reslut.txt","w"):
 
@@ -71,7 +83,7 @@ def total_sum(sort_after):
     sites_cluster_result = ''
     last_cotent = sorted_txt[1]
     num = 1
-  	##对reads进行统计
+  	## The data of reads were calculated ##
     reads_contain = [last_cotent.split("\t")[5]]
     for i in sorted_txt[2:]:
         if i == sorted_txt[-1]:
@@ -89,7 +101,7 @@ def total_sum(sort_after):
             last_cotent = i
             reads_contain = [last_cotent.split("\t")[5]]
         #print(i)
-  	##打开结果文件并写入
+  	## open the result file and write ##
     with open('sites_cluster_reslut','w') as f:
         f.write("cell_barcode"+"\t"+"human_genome"+"\t"+"humangenome_sites"+"\t"+"virus_genome"+"\t"+"virus_sites"+"\t"+"support_reads_num"+"\t"+"support_reads_contain"+"\n")
         f.write(sites_cluster_result)
